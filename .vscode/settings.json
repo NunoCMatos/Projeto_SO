@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.pl": "prolog",
+        "parser.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}

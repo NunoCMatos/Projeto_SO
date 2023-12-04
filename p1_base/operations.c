@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
 
 #include "eventlist.h"
-#include "constants.h"
 
 static struct EventList* event_list = NULL;
 static unsigned int state_access_delay_ms = 0;
@@ -158,7 +156,7 @@ int ems_reserve(unsigned int event_id, size_t num_seats, size_t* xs, size_t* ys)
   return 0;
 }
 
-int ems_show(int fd, unsigned int event_id) {
+int ems_show(unsigned int event_id) {
   if (event_list == NULL) {
     fprintf(stderr, "EMS state must be initialized\n");
     return 1;
@@ -174,32 +172,20 @@ int ems_show(int fd, unsigned int event_id) {
   for (size_t i = 1; i <= event->rows; i++) {
     for (size_t j = 1; j <= event->cols; j++) {
       unsigned int* seat = get_seat_with_delay(event, seat_index(event, i, j));
-      char seat_str[MAX_INT_DIGITS + 1];
-
-      snprintf(seat_str, MAX_INT_DIGITS + 1, "%u", *seat);
-      if (write(fd, seat_str, MAX_INT_DIGITS + 1) == -1) {
-        fprintf(stderr, "Error writing to file\n");
-        return 1;
-      }
+      printf("%u", *seat);
 
       if (j < event->cols) {
-        if (write(fd, " ", 2) == -1) {
-          fprintf(stderr, "Error writing to file\n");
-          return 1;
-        }
+        printf(" ");
       }
     }
 
-    if (write(fd, "\n", 2) == -1) {
-      fprintf(stderr, "Error writing to file\n");
-      return 1;
-    }
+    printf("\n");
   }
 
   return 0;
 }
 
-int ems_list_events(int fd) {
+int ems_list_events() {
   if (event_list == NULL) {
     fprintf(stderr, "EMS state must be initialized\n");
     return 1;
@@ -207,27 +193,13 @@ int ems_list_events(int fd) {
 
   if (event_list->head == NULL) {
     printf("No events\n");
-    if (write(fd, "No events\n", 10) == -1) {
-      fprintf(stderr, "Error writing to file\n");
-      return 1;
-    }
     return 0;
   }
 
   struct ListNode* current = event_list->head;
   while (current != NULL) {
-    char id_str[MAX_INT_DIGITS + 1];
     printf("Event: ");
-    if (write(fd, "Event: ", 8) == -1) {
-      fprintf(stderr, "Error writing to file\n");
-      return 1;
-    }
-
-    snprintf(id_str, MAX_INT_DIGITS + 1, "%u\n", (current->event)->id);
-    if (write(fd, id_str, 2) == -1) {
-      fprintf(stderr, "Error writing to file\n");
-      return 1;
-    }
+    printf("%u\n", (current->event)->id);
     current = current->next;
   }
 
