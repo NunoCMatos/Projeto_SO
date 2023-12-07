@@ -55,30 +55,23 @@ int main(int argc, char *argv[]) {
     int status, running_children = 0;
     pid_t pid = 1;
     while(1) {
-        for (;;) {
-            dp = readdir(dir);
-            if (dp == NULL)
-                break;
-            if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0 || strstr(dp->d_name, ".out") != NULL)
-                continue; /* Skip . and .. and *.out */
-            break;
-        }
-
+        dp = readdir(dir);
         if (dp == NULL)
             break;
+        if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0 || strstr(dp->d_name, ".out") != NULL)
+            continue; /* Skip . and .. and *.out */
         
         if (running_children < MAX_PROC) {
-            printf("File: %s\n", dp->d_name);
             running_children++;
-            pid = fork();
-            if (pid == -1) {
-                fprintf(stderr, "Failed to fork\n");
-                return 1;
-            }
         } else {
             wait(&status);
             printf("%d\n", status);
-            pid = fork();
+        }
+
+        pid = fork();
+        if (pid == -1) {
+            fprintf(stderr, "Failed to fork\n");
+            return 1;
         }
 
         if (pid == 0) {
@@ -86,7 +79,6 @@ int main(int argc, char *argv[]) {
             char file_path[PATH_MAX];
             snprintf(file_path, PATH_MAX, "%s/%s", argv[1], dp->d_name);
 
-            printf("Processing file: %s\n", file_path);
             // Open file
             int input_fp = open(file_path, O_RDONLY);
             if (input_fp == -1) {
