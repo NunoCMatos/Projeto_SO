@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include "constants.h"
 
@@ -38,7 +39,7 @@ static int read_uint(int fd, unsigned int *value, char *next) {
   return 0;
 }
 
-static void cleanup(int fd) {
+void cleanup(int fd) {
   char ch;
   while (read(fd, &ch, 1) == 1 && ch != '\n')
     ;
@@ -46,6 +47,7 @@ static void cleanup(int fd) {
 
 enum Command get_next(int fd) {
   char buf[16];
+
   if (read(fd, buf, 1) != 1) {
     return EOC;
   }
